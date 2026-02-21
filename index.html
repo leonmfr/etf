@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mon Portfolio - Vision Noms</title>
+    <title>Portfolio ETF - Version Corrigée</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 </head>
@@ -12,26 +12,24 @@
     <div class="max-w-6xl mx-auto">
         <header class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 col-span-1 md:col-span-2">
-                <h1 class="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-1 text-center md:text-left">Valorisation au cours actuel</h1>
+                <h1 class="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Valeur Actuelle du Portefeuille</h1>
                 <div class="flex flex-col md:flex-row items-center gap-4">
                     <span id="grand-total" class="text-4xl font-black text-slate-800 tracking-tight">--- €</span>
                     <span id="global-perc" class="text-lg font-bold px-4 py-1 rounded-full">--%</span>
                 </div>
-                <p class="text-slate-400 text-[10px] mt-2 italic text-center md:text-left">Performance calculée depuis le 15 Janvier 2024</p>
+                <p class="text-slate-400 text-[10px] mt-2 italic font-medium">Référence de performance : 15 Janvier</p>
             </div>
-            <div class="bg-indigo-600 p-6 rounded-2xl shadow-lg text-white flex flex-col justify-center items-center md:items-start relative overflow-hidden">
-                <div class="relative z-10">
-                    <span class="text-indigo-200 text-xs font-bold uppercase tracking-wide">Plus-value totale</span>
-                    <div id="total-profit-euro" class="text-2xl font-bold">-- €</div>
-                    <button onclick="toggleEdit()" class="mt-3 text-[10px] bg-white/20 hover:bg-white/30 py-1.5 px-4 rounded-full border border-white/20 transition-all backdrop-blur-sm">⚙️ AJUSTER QUANTITÉS / PRU</button>
-                </div>
+            <div class="bg-indigo-600 p-6 rounded-2xl shadow-lg text-white flex flex-col justify-center items-center md:items-start overflow-hidden shadow-indigo-200">
+                <span class="text-indigo-200 text-xs font-bold uppercase tracking-wide">Plus-value cumulée</span>
+                <div id="total-profit-euro" class="text-2xl font-bold italic">-- €</div>
+                <button onclick="toggleEdit()" class="mt-3 text-[10px] bg-white/20 hover:bg-white/30 py-1.5 px-4 rounded-full border border-white/20 transition-all font-bold">⚙️ CONFIGURER QUANTITÉS</button>
             </div>
         </header>
 
         <div id="edit-panel" class="hidden bg-white p-6 rounded-2xl mb-8 border border-indigo-100 shadow-xl">
-            <h2 class="font-bold mb-4 flex items-center gap-2"><span class="text-indigo-600">●</span> Paramètres de vos positions</h2>
+            <h2 class="font-bold mb-4 flex items-center gap-2 text-indigo-900">Mise à jour des positions (Source : 15 Janvier)</h2>
             <div id="edit-fields" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-            <button onclick="saveData()" class="mt-6 bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold w-full md:w-auto shadow-lg hover:bg-indigo-700 transition">Mettre à jour & Enregistrer</button>
+            <button onclick="saveData()" class="mt-6 bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold w-full md:w-auto shadow-lg hover:bg-indigo-700 transition uppercase text-xs tracking-widest">Sauvegarder les données</button>
         </div>
 
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-10">
@@ -39,7 +37,7 @@
                 <thead class="bg-slate-50 text-slate-400 text-[10px] uppercase font-black tracking-tighter border-b">
                     <tr>
                         <th class="p-4">Désignation de l'Actif</th>
-                        <th class="p-4 text-right">Investi (15/01)</th>
+                        <th class="p-4 text-right">PRU (15/01)</th>
                         <th class="p-4 text-right">Valeur Actuelle</th>
                         <th class="p-4 text-right">Évolution</th>
                     </tr>
@@ -48,19 +46,19 @@
             </table>
         </div>
 
-        <h2 class="text-sm font-black text-slate-500 uppercase tracking-widest mb-6 px-2">Analyse Technique 1 An</h2>
+        <h2 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-6 px-2">Flux Live TradingView</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="charts-grid"></div>
     </div>
 
     <script>
         const defaultData = [
-            { ticker: "ESE", name: "BNP Paribas S&P 500", qty: 2.0, pru: 29.548, symbol: "AMEX:SPY", drift: 1.062 },
-            { ticker: "PSP5", name: "Amundi S&P 500", qty: 2.0, pru: 51.24, symbol: "AMEX:VOO", drift: 1.059 },
-            { ticker: "CD8", name: "L&G Global Water", qty: 1.0, pru: 196.56, symbol: "BATS:CGW", drift: 1.028 },
-            { ticker: "PPFB", name: "BlackRock S&P 500", qty: 3.463, pru: 81.697, symbol: "AMEX:IVV", drift: 1.061 },
+            { ticker: "ESE", name: "BNP Paribas S&P 500", qty: 2.0, pru: 29.548, symbol: "EURONEXT:ESE", drift: 1.062 },
+            { ticker: "PSP 5", name: "Amundi S&P 500", qty: 2.0, pru: 51.24, symbol: "EURONEXT:PSP5", drift: 1.059 },
+            { ticker: "CD8", name: "L&G Global Water", qty: 1.0, pru: 196.56, symbol: "XETR:CD8", drift: 1.028 },
+            { ticker: "PPFB.DE", name: "BlackRock S&P 500 (DE)", qty: 3.463, pru: 81.697, symbol: "XETR:PPFB", drift: 1.061 },
             { ticker: "VOO", name: "Vanguard S&P 500", qty: 0.80245, pru: 634.28, symbol: "AMEX:VOO", drift: 1.060 },
             { ticker: "SCHD", name: "Schwab US Dividend Equity", qty: 15.36204, pru: 29.69, symbol: "AMEX:SCHD", drift: 0.992 },
-            { ticker: "SWDA", name: "iShares MSCI World", qty: 2.07, pru: 92.25, symbol: "BATS:URTH", drift: 1.045 }
+            { ticker: "SWDA.L", name: "iShares MSCI World (L)", qty: 2.07, pru: 92.25, symbol: "LSE:SWDA", drift: 1.045 }
         ];
 
         let myPortfolio = JSON.parse(localStorage.getItem('myETFData')) || defaultData;
@@ -85,18 +83,17 @@
                 totalBasis += basisValue;
                 totalCurrent += currentVal;
 
-                // On affiche le NOM en premier et le CODE en petit
                 rowsContainer.innerHTML += `
                     <tr class="text-sm hover:bg-slate-50 transition">
                         <td class="p-4">
                             <div class="font-bold text-slate-800 leading-tight">${item.name}</div>
-                            <div class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">${item.ticker}</div>
+                            <div class="text-[9px] text-indigo-500 font-black uppercase tracking-tighter">${item.ticker}</div>
                         </td>
-                        <td class="p-4 text-right text-slate-500 font-mono">${basisValue.toFixed(2)}€</td>
+                        <td class="p-4 text-right text-slate-500 font-mono">${item.pru.toFixed(2)}€</td>
                         <td class="p-4 text-right font-black text-slate-800 font-mono">${currentVal.toFixed(2)}€</td>
                         <td class="p-4 text-right">
-                            <span class="px-2 py-1 rounded text-[11px] font-black ${perf >= 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
-                                ${perf >= 0 ? '+' : ''}${perf}%
+                            <span class="px-2 py-0.5 rounded text-[10px] font-black ${perf >= 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
+                                ${perf >= 0 ? '▲' : '▼'} ${Math.abs(perf)}%
                             </span>
                         </td>
                     </tr>
@@ -104,19 +101,19 @@
 
                 editFields.innerHTML += `
                     <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
-                        <label class="block text-[10px] font-black text-indigo-600 uppercase mb-1">${item.name}</label>
+                        <label class="block text-[9px] font-black text-indigo-600 uppercase mb-1">${item.name}</label>
                         <div class="flex gap-2">
-                            <input type="number" step="any" id="qty-${index}" value="${item.qty}" class="w-1/2 p-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm">
-                            <input type="number" step="any" id="pru-${index}" value="${item.pru}" class="w-1/2 p-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm">
+                            <input type="number" step="any" id="qty-${index}" value="${item.qty}" class="w-1/2 p-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <input type="number" step="any" id="pru-${index}" value="${item.pru}" class="w-1/2 p-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
                         </div>
                     </div>
                 `;
 
                 const card = document.createElement('div');
                 card.className = "bg-white p-4 rounded-2xl shadow-sm border border-slate-100";
-                card.innerHTML = `<h3 class="font-black mb-3 text-[10px] text-slate-400 uppercase flex justify-between tracking-tighter">
+                card.innerHTML = `<h3 class="font-black mb-3 text-[10px] text-slate-400 uppercase flex justify-between tracking-widest">
                     <span>${item.name}</span>
-                    <span class="text-indigo-300 font-mono">${item.ticker}</span>
+                    <span class="text-indigo-400">${item.ticker}</span>
                 </h3><div id="chart_${index}"></div>`;
                 chartsGrid.appendChild(card);
 
@@ -124,7 +121,7 @@
                     "symbols": [[item.symbol, item.symbol]],
                     "width": "100%", "height": 300, "locale": "fr", "chartType": "area",
                     "container_id": "chart_" + index, "timeDiffType": "year",
-                    "lineColor": "#4f46e5", "topColor": "rgba(79, 70, 229, 0.15)", "bottomColor": "transparent",
+                    "lineColor": "#4f46e5", "topColor": "rgba(79, 70, 229, 0.12)", "bottomColor": "transparent",
                     "gridLineColor": "#f1f5f9"
                 });
             });
