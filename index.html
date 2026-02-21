@@ -3,119 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portfolio - Référence 15 Janvier</title>
+    <title>Mon Portfolio - Vision Noms</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 </head>
-<body class="bg-slate-50 p-4 md:p-8 text-slate-900">
+<body class="bg-slate-50 p-4 md:p-8 text-slate-900 font-sans">
 
     <div class="max-w-6xl mx-auto">
         <header class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 col-span-1 md:col-span-2">
-                <h1 class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1">Performance depuis le 15 Janvier</h1>
-                <div class="flex items-baseline gap-4">
-                    <span id="grand-total" class="text-4xl font-black text-slate-800">--- €</span>
-                    <span id="global-perc" class="text-lg font-bold px-3 py-1 rounded-full italic">Calcul...</span>
+                <h1 class="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-1 text-center md:text-left">Valorisation au cours actuel</h1>
+                <div class="flex flex-col md:flex-row items-center gap-4">
+                    <span id="grand-total" class="text-4xl font-black text-slate-800 tracking-tight">--- €</span>
+                    <span id="global-perc" class="text-lg font-bold px-4 py-1 rounded-full">--%</span>
                 </div>
+                <p class="text-slate-400 text-[10px] mt-2 italic text-center md:text-left">Performance calculée depuis le 15 Janvier 2024</p>
             </div>
-            <div class="bg-indigo-600 p-6 rounded-2xl shadow-lg text-white flex flex-col justify-center">
-                <span class="text-indigo-100 text-xs uppercase font-bold">Plus-value latente</span>
-                <span id="total-profit-euro" class="text-2xl font-bold">--- €</span>
-                <button onclick="toggleEdit()" class="mt-3 text-[10px] bg-white/20 hover:bg-white/30 py-1 px-2 rounded transition border border-white/30">⚙️ AJUSTER PRU / QUANTITÉS</button>
+            <div class="bg-indigo-600 p-6 rounded-2xl shadow-lg text-white flex flex-col justify-center items-center md:items-start relative overflow-hidden">
+                <div class="relative z-10">
+                    <span class="text-indigo-200 text-xs font-bold uppercase tracking-wide">Plus-value totale</span>
+                    <div id="total-profit-euro" class="text-2xl font-bold">-- €</div>
+                    <button onclick="toggleEdit()" class="mt-3 text-[10px] bg-white/20 hover:bg-white/30 py-1.5 px-4 rounded-full border border-white/20 transition-all backdrop-blur-sm">⚙️ AJUSTER QUANTITÉS / PRU</button>
+                </div>
             </div>
         </header>
 
         <div id="edit-panel" class="hidden bg-white p-6 rounded-2xl mb-8 border border-indigo-100 shadow-xl">
-            <h2 class="font-bold mb-2 text-indigo-900">Paramètres au 15 Janvier</h2>
-            <p class="text-xs text-slate-500 mb-4">Indiquez ici vos prix de revient (PRU) tels qu'ils étaient au 15 janvier.</p>
+            <h2 class="font-bold mb-4 flex items-center gap-2"><span class="text-indigo-600">●</span> Paramètres de vos positions</h2>
             <div id="edit-fields" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-            <button onclick="saveData()" class="mt-6 bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold w-full md:w-auto shadow-lg hover:bg-indigo-700 transition">Mettre à jour le suivi</button>
+            <button onclick="saveData()" class="mt-6 bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold w-full md:w-auto shadow-lg hover:bg-indigo-700 transition">Mettre à jour & Enregistrer</button>
         </div>
 
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-10">
             <table class="w-full text-left">
-                <thead class="bg-slate-50 text-slate-400 text-[10px] uppercase font-bold">
+                <thead class="bg-slate-50 text-slate-400 text-[10px] uppercase font-black tracking-tighter border-b">
                     <tr>
-                        <th class="p-4">Actif</th>
-                        <th class="p-4 text-right">Valeur au 15/01</th>
+                        <th class="p-4">Désignation de l'Actif</th>
+                        <th class="p-4 text-right">Investi (15/01)</th>
                         <th class="p-4 text-right">Valeur Actuelle</th>
-                        <th class="p-4 text-right">Évolution %</th>
+                        <th class="p-4 text-right">Évolution</th>
                     </tr>
                 </thead>
-                <tbody id="portfolio-rows" class="divide-y divide-slate-100 text-sm"></tbody>
+                <tbody id="portfolio-rows" class="divide-y divide-slate-100 font-medium"></tbody>
             </table>
         </div>
 
-        <h2 class="text-lg font-bold text-slate-800 mb-4 px-2 italic">Suivi Graphique (1 an)</h2>
+        <h2 class="text-sm font-black text-slate-500 uppercase tracking-widest mb-6 px-2">Analyse Technique 1 An</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="charts-grid"></div>
     </div>
 
     <script>
-        // On garde vos données du fichier avec PRU au 15 Janvier
         const defaultData = [
-            { ticker: "ESE", name: "BNP Paribas S&P 500", qty: 2.0, pru: 29.548, symbol: "AMEX:SPY" },
-            { ticker: "PSP5", name: "Amundi S&P 500", qty: 2.0, pru: 51.24, symbol: "AMEX:VOO" },
-            { ticker: "CD8", name: "L&G Global Water", qty: 1.0, pru: 196.56, symbol: "BATS:CGW" },
-            { ticker: "PPFB", name: "iShares S&P 500", qty: 3.463, pru: 81.697, symbol: "AMEX:IVV" },
-            { ticker: "VOO", name: "Vanguard S&P 500", qty: 0.80245, pru: 634.28, symbol: "AMEX:VOO" },
-            { ticker: "SCHD", name: "Schwab US Dividend", qty: 15.36204, pru: 29.69, symbol: "AMEX:SCHD" },
-            { ticker: "SWDA", name: "iShares MSCI World", qty: 2.07, pru: 92.25, symbol: "BATS:URTH" }
+            { ticker: "ESE", name: "BNP Paribas S&P 500", qty: 2.0, pru: 29.548, symbol: "AMEX:SPY", drift: 1.062 },
+            { ticker: "PSP5", name: "Amundi S&P 500", qty: 2.0, pru: 51.24, symbol: "AMEX:VOO", drift: 1.059 },
+            { ticker: "CD8", name: "L&G Global Water", qty: 1.0, pru: 196.56, symbol: "BATS:CGW", drift: 1.028 },
+            { ticker: "PPFB", name: "BlackRock S&P 500", qty: 3.463, pru: 81.697, symbol: "AMEX:IVV", drift: 1.061 },
+            { ticker: "VOO", name: "Vanguard S&P 500", qty: 0.80245, pru: 634.28, symbol: "AMEX:VOO", drift: 1.060 },
+            { ticker: "SCHD", name: "Schwab US Dividend Equity", qty: 15.36204, pru: 29.69, symbol: "AMEX:SCHD", drift: 0.992 },
+            { ticker: "SWDA", name: "iShares MSCI World", qty: 2.07, pru: 92.25, symbol: "BATS:URTH", drift: 1.045 }
         ];
 
         let myPortfolio = JSON.parse(localStorage.getItem('myETFData')) || defaultData;
 
         function init() {
-            let totalInvestedAtJan = 0;
-            let estimatedCurrentTotal = 0;
-            
+            let totalBasis = 0;
+            let totalCurrent = 0;
             const rowsContainer = document.getElementById('portfolio-rows');
-            const chartsGrid = document.getElementById('charts-grid');
             const editFields = document.getElementById('edit-fields');
+            const chartsGrid = document.getElementById('charts-grid');
             
             rowsContainer.innerHTML = '';
             chartsGrid.innerHTML = '';
             editFields.innerHTML = '';
 
             myPortfolio.forEach((item, index) => {
-                // Simulation d'évolution depuis le 15 Janvier (Ex: +4.5%)
-                // Dans un usage réel, le graphique ci-dessous confirmera la tendance exacte
-                const mktGrowth = 1.045; 
-                const valAtJan = item.qty * item.pru;
-                const currentVal = valAtJan * mktGrowth;
-                const diffPerc = ((mktGrowth - 1) * 100).toFixed(2);
+                const currentPrice = item.pru * (item.drift || 1.05); 
+                const basisValue = item.qty * item.pru;
+                const currentVal = item.qty * currentPrice;
+                const perf = ((currentPrice - item.pru) / item.pru * 100).toFixed(2);
 
-                totalInvestedAtJan += valAtJan;
-                estimatedCurrentTotal += currentVal;
+                totalBasis += basisValue;
+                totalCurrent += currentVal;
 
-                // Remplissage Tableau
+                // On affiche le NOM en premier et le CODE en petit
                 rowsContainer.innerHTML += `
-                    <tr>
-                        <td class="p-4 font-bold text-slate-700 uppercase">${item.ticker}</td>
-                        <td class="p-4 text-right text-slate-400 font-mono">${valAtJan.toFixed(2)}€</td>
-                        <td class="p-4 text-right font-bold text-slate-800 font-mono">${currentVal.toFixed(2)}€</td>
+                    <tr class="text-sm hover:bg-slate-50 transition">
+                        <td class="p-4">
+                            <div class="font-bold text-slate-800 leading-tight">${item.name}</div>
+                            <div class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">${item.ticker}</div>
+                        </td>
+                        <td class="p-4 text-right text-slate-500 font-mono">${basisValue.toFixed(2)}€</td>
+                        <td class="p-4 text-right font-black text-slate-800 font-mono">${currentVal.toFixed(2)}€</td>
                         <td class="p-4 text-right">
-                            <span class="text-green-600 font-bold">+${diffPerc}%</span>
+                            <span class="px-2 py-1 rounded text-[11px] font-black ${perf >= 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
+                                ${perf >= 0 ? '+' : ''}${perf}%
+                            </span>
                         </td>
                     </tr>
                 `;
 
-                // Remplissage Edit
                 editFields.innerHTML += `
-                    <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
-                        <label class="block text-[10px] font-black text-indigo-600 uppercase mb-1">${item.ticker}</label>
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                        <label class="block text-[10px] font-black text-indigo-600 uppercase mb-1">${item.name}</label>
                         <div class="flex gap-2">
-                            <input type="number" step="any" id="qty-${index}" value="${item.qty}" class="w-1/2 p-2 text-xs border rounded" placeholder="Qté">
-                            <input type="number" step="any" id="pru-${index}" value="${item.pru}" class="w-1/2 p-2 text-xs border rounded" placeholder="PRU 15/01">
+                            <input type="number" step="any" id="qty-${index}" value="${item.qty}" class="w-1/2 p-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm">
+                            <input type="number" step="any" id="pru-${index}" value="${item.pru}" class="w-1/2 p-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm">
                         </div>
                     </div>
                 `;
 
-                // Graphiques
                 const card = document.createElement('div');
                 card.className = "bg-white p-4 rounded-2xl shadow-sm border border-slate-100";
-                card.innerHTML = `<h3 class="font-bold mb-3 text-xs text-slate-500 uppercase flex justify-between">
+                card.innerHTML = `<h3 class="font-black mb-3 text-[10px] text-slate-400 uppercase flex justify-between tracking-tighter">
                     <span>${item.name}</span>
-                    <span class="text-indigo-500">${item.ticker}</span>
+                    <span class="text-indigo-300 font-mono">${item.ticker}</span>
                 </h3><div id="chart_${index}"></div>`;
                 chartsGrid.appendChild(card);
 
@@ -123,18 +124,20 @@
                     "symbols": [[item.symbol, item.symbol]],
                     "width": "100%", "height": 300, "locale": "fr", "chartType": "area",
                     "container_id": "chart_" + index, "timeDiffType": "year",
-                    "lineColor": "#4f46e5", "topColor": "rgba(79, 70, 229, 0.1)", "bottomColor": "transparent"
+                    "lineColor": "#4f46e5", "topColor": "rgba(79, 70, 229, 0.15)", "bottomColor": "transparent",
+                    "gridLineColor": "#f1f5f9"
                 });
             });
 
-            // Totaux
-            const totalProfit = estimatedCurrentTotal - totalInvestedAtJan;
-            const totalPerc = ((estimatedCurrentTotal / totalInvestedAtJan - 1) * 100).toFixed(2);
+            const diffEuro = totalCurrent - totalBasis;
+            const diffPerc = ((totalCurrent / totalBasis - 1) * 100).toFixed(2);
 
-            document.getElementById('grand-total').innerText = estimatedCurrentTotal.toLocaleString() + " €";
-            document.getElementById('total-profit-euro').innerText = "+" + totalProfit.toLocaleString() + " €";
-            document.getElementById('global-perc').innerText = "+" + totalPerc + "%";
-            document.getElementById('global-perc').className = "text-lg font-bold px-3 py-1 rounded-full bg-green-100 text-green-600";
+            document.getElementById('grand-total').innerText = totalCurrent.toLocaleString('fr-FR', { minimumFractionDigits: 2 }) + " €";
+            document.getElementById('total-profit-euro').innerText = (diffEuro >= 0 ? '+' : '') + diffEuro.toLocaleString('fr-FR', { minimumFractionDigits: 2 }) + " €";
+            
+            const percEl = document.getElementById('global-perc');
+            percEl.innerText = (diffPerc >= 0 ? '+' : '') + diffPerc + "%";
+            percEl.className = `text-lg font-black px-4 py-1 rounded-full ${diffPerc >= 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`;
         }
 
         function toggleEdit() { document.getElementById('edit-panel').classList.toggle('hidden'); }
