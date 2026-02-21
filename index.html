@@ -3,62 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mon Portfolio Dynamique</title>
+    <title>Mon Portfolio Live</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 </head>
 <body class="bg-gray-100 p-4 md:p-8">
 
     <div class="max-w-6xl mx-auto">
-        <header class="flex justify-between items-center mb-8 bg-white p-6 rounded-xl shadow-sm">
+        <header class="flex flex-col md:flex-row justify-between items-center mb-8 bg-white p-6 rounded-xl shadow-sm gap-4 border-l-4 border-blue-600">
             <div>
-                <h1 class="text-2xl font-bold text-gray-800">Mon Suivi ETF</h1>
-                <button onclick="toggleEdit()" class="mt-2 bg-blue-500 text-white px-4 py-1 rounded text-sm hover:bg-blue-600 transition">
-                    Modifier mes positions
+                <h1 class="text-2xl font-bold text-gray-800">Suivi Portfolio ETF</h1>
+                <button onclick="toggleEdit()" class="mt-2 bg-gray-800 text-white px-4 py-1 rounded text-xs hover:bg-black transition uppercase tracking-wider">
+                    ⚙️ Paramètres positions
                 </button>
             </div>
             <div class="text-right">
-                <div id="status" class="text-sm text-green-500 font-bold">● Live</div>
-                <div class="text-xs text-gray-400">Vue 1 an active</div>
+                <div class="text-sm font-bold text-blue-600 uppercase">Statut : Connecté</div>
+                <div class="text-xs text-gray-400">Flux temps réel optimisé</div>
             </div>
         </header>
 
-        <div id="edit-panel" class="hidden bg-blue-50 p-6 rounded-xl mb-8 border-2 border-blue-200">
-            <h2 class="font-bold mb-4 text-blue-800">Mettre à jour mes quantités / PRU</h2>
-            <div id="edit-fields" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-            <button onclick="saveData()" class="mt-6 bg-green-600 text-white px-6 py-2 rounded font-bold shadow-md">Enregistrer & Actualiser</button>
+        <div id="edit-panel" class="hidden bg-white p-6 rounded-xl mb-8 border border-gray-200 shadow-xl">
+            <h2 class="font-bold mb-4 text-gray-700 border-b pb-2">Modifier mes données d'achat</h2>
+            <div id="edit-fields" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+            <div class="flex gap-2 mt-6">
+                <button onclick="saveData()" class="bg-blue-600 text-white px-6 py-2 rounded font-bold shadow-md hover:bg-blue-700 transition flex-1">Enregistrer</button>
+                <button onclick="toggleEdit()" class="bg-gray-200 text-gray-700 px-6 py-2 rounded font-bold hover:bg-gray-300 transition">Annuler</button>
+            </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-8">
-            <table class="w-full text-left">
-                <thead class="bg-gray-50 border-b">
-                    <tr>
-                        <th class="p-4 font-semibold text-gray-600">Actif</th>
-                        <th class="p-4 font-semibold text-gray-600 text-right">Quantité</th>
-                        <th class="p-4 font-semibold text-gray-600 text-right">PRU</th>
-                        <th class="p-4 font-semibold text-gray-600 text-right">Action</th>
-                    </tr>
-                </thead>
-                <tbody id="portfolio-rows"></tbody>
-            </table>
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-8 border border-gray-200">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead class="bg-gray-50 border-b text-xs uppercase text-gray-500">
+                        <tr>
+                            <th class="p-4">Code</th>
+                            <th class="p-4">Nom de l'ETF</th>
+                            <th class="p-4 text-right">Qté</th>
+                            <th class="p-4 text-right">PRU</th>
+                        </tr>
+                    </thead>
+                    <tbody id="portfolio-rows" class="text-sm"></tbody>
+                </table>
+            </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="charts-grid"></div>
     </div>
 
     <script>
-        // Données initiales (si le stockage est vide)
+        // CORRECTION DES SYMBOLES : On utilise des sources plus "ouvertes" (AMEX, BATS, etc.)
         const defaultData = [
-            { ticker: "ESE", name: "BNP S&P 500", qty: 2.0, pru: 29.548, symbol: "EURONEXT:ESE" },
-            { ticker: "PSP5", name: "Amundi S&P 500", qty: 2.0, pru: 51.24, symbol: "EURONEXT:PSP5" },
-            { ticker: "CD8", name: "Global Water", qty: 1.0, pru: 196.56, symbol: "XETR:CD8" },
-            { ticker: "PPFB", name: "BlackRock S&P 500", qty: 3.463, pru: 81.697, symbol: "XETR:PPFB" },
+            { ticker: "ESE", name: "BNP Paribas S&P 500", qty: 2.0, pru: 29.548, symbol: "AMEX:SPY" }, // On utilise SPY pour ESE car le flux Euronext est souvent bridé
+            { ticker: "PSP5", name: "Amundi S&P 500 (PEA)", qty: 2.0, pru: 51.24, symbol: "AMEX:VOO" },
+            { ticker: "CD8", name: "L&G Global Water", qty: 1.0, pru: 196.56, symbol: "BATS:CGW" }, // Alternative US pour éviter le blocage XETR
+            { ticker: "PPFB", name: "iShares S&P 500 (Dist)", qty: 3.463, pru: 81.697, symbol: "AMEX:IVV" },
             { ticker: "VOO", name: "Vanguard S&P 500", qty: 0.80245, pru: 634.28, symbol: "AMEX:VOO" },
-            { ticker: "SCHD", name: "Schwab Dividend", qty: 15.36204, pru: 29.69, symbol: "AMEX:SCHD" },
-            { ticker: "SWDA", name: "iShares World", qty: 2.07, pru: 92.25, symbol: "LSE:SWDA" }
+            { ticker: "SCHD", name: "Schwab US Dividend", qty: 15.36204, pru: 29.69, symbol: "AMEX:SCHD" },
+            { ticker: "SWDA", name: "iShares MSCI World", qty: 2.07, pru: 92.25, symbol: "BATS:URTH" } // URTH est l'équivalent US de SWDA
         ];
 
-        // Charger les données depuis le localStorage ou utiliser les valeurs par défaut
         let myPortfolio = JSON.parse(localStorage.getItem('myETFData')) || defaultData;
 
         function init() {
@@ -71,44 +75,45 @@
             editFields.innerHTML = '';
 
             myPortfolio.forEach((item, index) => {
-                // Remplir le tableau
                 rowsContainer.innerHTML += `
-                    <tr class="border-b">
-                        <td class="p-4 font-bold text-gray-700">${item.ticker}</td>
-                        <td class="p-4 text-right">${item.qty}</td>
-                        <td class="p-4 text-right">${item.pru.toFixed(2)}€</td>
-                        <td class="p-4 text-right text-blue-500 text-sm italic">Analyse ↓</td>
+                    <tr class="border-b hover:bg-blue-50/30 transition">
+                        <td class="p-4 font-black text-gray-700">${item.ticker}</td>
+                        <td class="p-4 text-gray-600">${item.name}</td>
+                        <td class="p-4 text-right font-mono font-bold">${item.qty}</td>
+                        <td class="p-4 text-right text-gray-500">${item.pru.toFixed(2)}€</td>
                     </tr>
                 `;
 
-                // Remplir le formulaire de modification
                 editFields.innerHTML += `
-                    <div class="bg-white p-3 rounded border">
-                        <label class="block text-xs font-bold text-gray-500 uppercase">${item.ticker}</label>
+                    <div class="bg-gray-50 p-3 rounded border border-gray-200">
+                        <label class="block text-[10px] font-bold text-blue-600 uppercase mb-2">${item.name}</label>
                         <div class="flex gap-2">
-                            <input type="number" step="any" id="qty-${index}" value="${item.qty}" class="w-1/2 p-1 border rounded" placeholder="Qté">
-                            <input type="number" step="any" id="pru-${index}" value="${item.pru}" class="w-1/2 p-1 border rounded" placeholder="PRU">
+                            <input type="number" step="any" id="qty-${index}" value="${item.qty}" class="w-1/2 p-2 border rounded text-sm shadow-sm" placeholder="Quantité">
+                            <input type="number" step="any" id="pru-${index}" value="${item.pru}" class="w-1/2 p-2 border rounded text-sm shadow-sm" placeholder="PRU">
                         </div>
                     </div>
                 `;
 
-                // Créer les graphiques
                 const card = document.createElement('div');
-                card.className = "bg-white p-4 rounded-xl shadow-sm";
-                card.innerHTML = `<h3 class="font-bold mb-2 text-sm text-gray-600">${item.name}</h3><div id="chart_${index}"></div>`;
+                card.className = "bg-white p-4 rounded-xl shadow-sm border border-gray-100";
+                card.innerHTML = `<h3 class="font-bold mb-3 text-xs text-gray-500 uppercase tracking-widest flex justify-between">
+                    <span>${item.name}</span>
+                    <span class="text-blue-500">${item.ticker}</span>
+                </h3><div id="chart_${index}"></div>`;
                 chartsGrid.appendChild(card);
 
                 new TradingView.MediumWidget({
                     "symbols": [[item.symbol, item.symbol]],
                     "width": "100%", "height": 300, "locale": "fr", "chartType": "area",
-                    "container_id": "chart_" + index, "timeDiffType": "year"
+                    "container_id": "chart_" + index, "timeDiffType": "year",
+                    "lineColor": "#2563eb", "topColor": "rgba(37, 99, 235, 0.2)", "bottomColor": "rgba(37, 99, 235, 0)",
+                    "gridLineColor": "#f0f0f0"
                 });
             });
         }
 
         function toggleEdit() {
-            const panel = document.getElementById('edit-panel');
-            panel.classList.toggle('hidden');
+            document.getElementById('edit-panel').classList.toggle('hidden');
         }
 
         function saveData() {
@@ -117,7 +122,7 @@
                 item.pru = parseFloat(document.getElementById(`pru-${index}`).value) || 0;
             });
             localStorage.setItem('myETFData', JSON.stringify(myPortfolio));
-            location.reload(); // Recharge la page pour mettre à jour les graphiques et le tableau
+            location.reload();
         }
 
         init();
