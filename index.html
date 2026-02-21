@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Portfolio Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+</head>
+<body class="bg-gray-100 p-4 md:p-8">
+
+    <div class="max-w-6xl mx-auto">
+        <header class="flex justify-between items-center mb-8 bg-white p-6 rounded-xl shadow-sm">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800">Mon Suivi ETF</h1>
+                <p class="text-gray-500 text-sm">Mise à jour en temps réel (Flux TradingView)</p>
+            </div>
+            <div class="text-right">
+                <div id="total-value" class="text-3xl font-black text-blue-600">Calcul...</div>
+                <div id="total-profit" class="text-lg font-semibold">--</div>
+            </div>
+        </header>
+
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-8">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead class="bg-gray-50 border-b">
+                        <tr>
+                            <th class="p-4 font-semibold text-gray-600">Actif</th>
+                            <th class="p-4 font-semibold text-gray-600 text-right">Quantité</th>
+                            <th class="p-4 font-semibold text-gray-600 text-right">PRU</th>
+                            <th class="p-4 font-semibold text-gray-600 text-right">Plus-Value</th>
+                        </tr>
+                    </thead>
+                    <tbody id="portfolio-rows">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Analyse Graphique (1 an)</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="charts-grid"></div>
+    </div>
+
+    <script>
+        // Vos données extraites du fichier
+        const portfolio = [
+            { ticker: "ESE", name: "BNP S&P 500", qty: 2.0, pru: 29.548, symbol: "EURONEXT:ESE" },
+            { ticker: "PSP 5", name: "Amundi S&P 500", qty: 2.0, pru: 51.24, symbol: "EURONEXT:PSP5" },
+            { ticker: "CD8", name: "Global Water", qty: 1.0, pru: 196.56, symbol: "XETR:CD8" },
+            { ticker: "PPFB", name: "BlackRock S&P 500", qty: 3.463, pru: 81.697, symbol: "XETR:PPFB" },
+            { ticker: "VOO", name: "Vanguard S&P 500", qty: 0.80245, pru: 634.28, symbol: "AMEX:VOO" },
+            { ticker: "SCHD", name: "Schwab Dividend", qty: 15.36204, pru: 29.69, symbol: "AMEX:SCHD" },
+            { ticker: "SWDA", name: "iShares World", qty: 2.07, pru: 92.25, symbol: "LSE:SWDA" } // Ajusté /100 pour SWDA.L
+        ];
+
+        const rowsContainer = document.getElementById('portfolio-rows');
+        const chartsGrid = document.getElementById('charts-grid');
+
+        portfolio.forEach((item, index) => {
+            // Ajout au tableau (Plus-values estimées visuellement par le widget)
+            const row = document.createElement('tr');
+            row.className = "border-b hover:bg-gray-50 transition";
+            row.innerHTML = `
+                <td class="p-4 font-bold text-gray-700">${item.ticker}</td>
+                <td class="p-4 text-right">${item.qty}</td>
+                <td class="p-4 text-right text-gray-500">${item.pru.toFixed(2)}€</td>
+                <td class="p-4 text-right italic text-blue-500 text-sm">Voir graphique →</td>
+            `;
+            rowsContainer.appendChild(row);
+
+            // Ajout du Widget Graphique
+            const card = document.createElement('div');
+            card.className = "bg-white p-4 rounded-xl shadow-sm";
+            card.innerHTML = `<h3 class="font-bold mb-2 text-sm text-gray-600">${item.name}</h3><div id="chart_${index}"></div>`;
+            chartsGrid.appendChild(card);
+
+            new TradingView.MediumWidget({
+                "symbols": [[item.symbol, item.symbol]],
+                "width": "100%", "height": 350,
+                "locale": "fr", "chartType": "area",
+                "gridLineColor": "#e1e3eb",
+                "fontColor": "#787b86",
+                "isTransparent": false,
+                "container_id": "chart_" + index,
+                "timeDiffType": "year"
+            });
+        });
+
+        document.getElementById('total-value').innerText = "Dashboard Actif";
+    </script>
+</body>
+</html>
