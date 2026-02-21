@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mon Portfolio ETF - Version Finale</title>
+    <title>Portfolio ETF - Version Stable</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 </head>
@@ -22,19 +22,19 @@
             <div class="bg-indigo-600 p-6 rounded-2xl shadow-lg text-white flex flex-col justify-center items-center md:items-start overflow-hidden">
                 <span class="text-indigo-200 text-xs font-bold uppercase tracking-wide">Plus-value cumulée</span>
                 <div id="total-profit-euro" class="text-2xl font-bold italic">-- €</div>
-                <button onclick="toggleEdit()" class="mt-3 text-[10px] bg-white/20 hover:bg-white/30 py-1.5 px-4 rounded-full border border-white/20 transition-all font-bold">⚙️ AJUSTER POSITIONS</button>
+                <button onclick="toggleEdit()" class="mt-3 text-[10px] bg-white/20 hover:bg-white/30 py-1.5 px-4 rounded-full border border-white/20 transition-all font-bold uppercase">⚙️ Ajuster Positions</button>
             </div>
         </header>
 
         <div id="edit-panel" class="hidden bg-white p-6 rounded-2xl mb-8 border border-indigo-100 shadow-xl">
-            <h2 class="font-bold mb-4 text-indigo-900">Paramètres (Valeurs au 15/01)</h2>
+            <h2 class="font-bold mb-4 text-indigo-900 flex items-center gap-2">Edition</h2>
             <div id="edit-fields" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
             <button onclick="saveData()" class="mt-6 bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold w-full md:w-auto shadow-lg hover:bg-indigo-700 transition uppercase text-xs tracking-widest">Enregistrer</button>
         </div>
 
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-10">
             <table class="w-full text-left">
-                <thead class="bg-slate-50 text-slate-400 text-[10px] uppercase font-black tracking-tighter border-b">
+                <thead class="bg-slate-50 text-slate-400 text-[10px] uppercase font-black border-b">
                     <tr>
                         <th class="p-4">Désignation de l'Actif</th>
                         <th class="p-4 text-right">Investi (15/01)</th>
@@ -54,7 +54,8 @@
         const defaultData = [
             { ticker: "ESE", name: "BNP Paribas S&P 500", qty: 2.0, pru: 29.548, symbol: "AMEX:SPY", drift: 1.058 },
             { ticker: "PSP 5", name: "Amundi S&P 500", qty: 2.0, pru: 51.24, symbol: "AMEX:VOO", drift: 1.057 },
-            { ticker: "cd8", name: "Amundi EMU High Dividend", qty: 1.0, pru: 196.56, symbol: "XETR:CD8", drift: 1.031 },
+            // CHANGEMENT ICI : On utilise AMED (code international pour le même fonds Amundi EMU High Div)
+            { ticker: "cd8", name: "Amundi EMU High Dividend", qty: 1.0, pru: 196.56, symbol: "XETR:AMED", drift: 1.031 },
             { ticker: "ppfb.de", name: "iShares Physical Gold", qty: 3.463, pru: 81.697, symbol: "TVC:GOLD", drift: 1.042 },
             { ticker: "VOO", name: "Vanguard S&P 500", qty: 0.80245, pru: 634.28, symbol: "AMEX:VOO", drift: 1.058 },
             { ticker: "SCHD", name: "Schwab US Dividend Equity", qty: 15.36204, pru: 29.69, symbol: "AMEX:SCHD", drift: 1.012 },
@@ -76,7 +77,6 @@
 
             myPortfolio.forEach((item, index) => {
                 let adjustedPru = item.pru;
-                // Correction pour SWDA.L si saisi en pence
                 if(item.ticker === "SWDA.L" && item.pru > 5000) adjustedPru = item.pru / 100;
 
                 const currentPrice = adjustedPru * (item.drift || 1.05); 
@@ -107,8 +107,8 @@
                     <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
                         <label class="block text-[9px] font-black text-indigo-600 uppercase mb-1">${item.name}</label>
                         <div class="flex gap-2">
-                            <input type="number" step="any" id="qty-${index}" value="${item.qty}" class="w-1/2 p-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
-                            <input type="number" step="any" id="pru-${index}" value="${item.pru}" class="w-1/2 p-2 text-xs border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <input type="number" step="any" id="qty-${index}" value="${item.qty}" class="w-1/2 p-2 text-xs border rounded-lg">
+                            <input type="number" step="any" id="pru-${index}" value="${item.pru}" class="w-1/2 p-2 text-xs border rounded-lg">
                         </div>
                     </div>
                 `;
