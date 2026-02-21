@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mon Portfolio ETF & Or</title>
+    <title>Mon Portfolio ETF - Version Finale</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 </head>
@@ -19,9 +19,9 @@
                 </div>
                 <p class="text-slate-400 text-[10px] mt-2 italic font-medium">Performance depuis le 15 Janvier</p>
             </div>
-            <div class="bg-indigo-600 p-6 rounded-2xl shadow-lg text-white flex flex-col justify-center items-center md:items-start overflow-hidden shadow-indigo-200">
-                <span class="text-indigo-200 text-xs font-bold uppercase tracking-wide text-center md:text-left">Plus-value cumulée</span>
-                <div id="total-profit-euro" class="text-2xl font-bold italic text-center md:text-left">-- €</div>
+            <div class="bg-indigo-600 p-6 rounded-2xl shadow-lg text-white flex flex-col justify-center items-center md:items-start overflow-hidden">
+                <span class="text-indigo-200 text-xs font-bold uppercase tracking-wide">Plus-value cumulée</span>
+                <div id="total-profit-euro" class="text-2xl font-bold italic">-- €</div>
                 <button onclick="toggleEdit()" class="mt-3 text-[10px] bg-white/20 hover:bg-white/30 py-1.5 px-4 rounded-full border border-white/20 transition-all font-bold">⚙️ AJUSTER POSITIONS</button>
             </div>
         </header>
@@ -51,11 +51,10 @@
     </div>
 
     <script>
-        // CORRECTION : ppfb.de pointe maintenant vers l'OR (Symbol TVC:GOLD)
         const defaultData = [
             { ticker: "ESE", name: "BNP Paribas S&P 500", qty: 2.0, pru: 29.548, symbol: "AMEX:SPY", drift: 1.058 },
             { ticker: "PSP 5", name: "Amundi S&P 500", qty: 2.0, pru: 51.24, symbol: "AMEX:VOO", drift: 1.057 },
-            { ticker: "cd8", name: "L&G Global Water", qty: 1.0, pru: 196.56, symbol: "BATS:CGW", drift: 1.025 },
+            { ticker: "cd8", name: "Amundi EMU High Dividend", qty: 1.0, pru: 196.56, symbol: "XETR:CD8", drift: 1.031 },
             { ticker: "ppfb.de", name: "iShares Physical Gold", qty: 3.463, pru: 81.697, symbol: "TVC:GOLD", drift: 1.042 },
             { ticker: "VOO", name: "Vanguard S&P 500", qty: 0.80245, pru: 634.28, symbol: "AMEX:VOO", drift: 1.058 },
             { ticker: "SCHD", name: "Schwab US Dividend Equity", qty: 15.36204, pru: 29.69, symbol: "AMEX:SCHD", drift: 1.012 },
@@ -77,6 +76,7 @@
 
             myPortfolio.forEach((item, index) => {
                 let adjustedPru = item.pru;
+                // Correction pour SWDA.L si saisi en pence
                 if(item.ticker === "SWDA.L" && item.pru > 5000) adjustedPru = item.pru / 100;
 
                 const currentPrice = adjustedPru * (item.drift || 1.05); 
@@ -125,7 +125,7 @@
                     "symbols": [[item.symbol, item.symbol]],
                     "width": "100%", "height": 300, "locale": "fr", "chartType": "area",
                     "container_id": "chart_" + index, "timeDiffType": "year",
-                    "lineColor": item.ticker === "ppfb.de" ? "#eab308" : "#4f46e5", // Couleur Or pour l'or
+                    "lineColor": item.ticker === "ppfb.de" ? "#eab308" : "#4f46e5",
                     "topColor": item.ticker === "ppfb.de" ? "rgba(234, 179, 8, 0.12)" : "rgba(79, 70, 229, 0.12)",
                     "bottomColor": "transparent",
                     "gridLineColor": "#f1f5f9"
