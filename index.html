@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portfolio ETF & Actions - Dynamique</title>
+    <title>Portfolio eToro Sync</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 </head>
@@ -12,30 +12,29 @@
     <div class="max-w-6xl mx-auto">
         <header class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 col-span-1 md:col-span-2">
-                <h1 class="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Valorisation du Portefeuille</h1>
+                <h1 class="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Valorisation Totale (Saisie Manuelle)</h1>
                 <div class="flex flex-col md:flex-row items-center gap-4">
                     <span id="grand-total" class="text-4xl font-black text-slate-800 tracking-tight">--- €</span>
                     <span id="global-perc" class="text-lg font-bold px-4 py-1 rounded-full">--%</span>
                 </div>
             </div>
-            <div class="bg-indigo-600 p-6 rounded-2xl shadow-lg text-white flex flex-col justify-center items-center md:items-start overflow-hidden shadow-indigo-200">
-                <span class="text-indigo-200 text-xs font-bold uppercase tracking-wide">Plus-value cumulée</span>
+            <div class="bg-indigo-600 p-6 rounded-2xl shadow-lg text-white flex flex-col justify-center items-center md:items-start overflow-hidden">
+                <span class="text-indigo-200 text-xs font-bold uppercase tracking-wide">Plus-value totale</span>
                 <div id="total-profit-euro" class="text-2xl font-bold italic">-- €</div>
-                <button onclick="toggleEdit()" class="mt-3 text-[10px] bg-white/20 hover:bg-white/30 py-1.5 px-4 rounded-full border border-white/20 transition-all font-bold uppercase">⚙️ Gérer les actifs</button>
+                <button onclick="toggleEdit()" class="mt-3 text-[10px] bg-white/20 hover:bg-white/30 py-1.5 px-4 rounded-full border border-white/20 transition-all font-bold uppercase tracking-widest">⚙️ Synchroniser Prix</button>
             </div>
         </header>
 
         <div id="edit-panel" class="hidden bg-white p-6 rounded-2xl mb-8 border border-indigo-100 shadow-xl">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="font-bold text-indigo-900 flex items-center gap-2">Configuration des actifs</h2>
-                <button onclick="addNewAsset()" class="bg-green-500 hover:bg-green-600 text-white text-[10px] font-black py-2 px-4 rounded-lg transition uppercase tracking-wider">+ Ajouter un actif</button>
+                <h2 class="font-bold text-indigo-900">Mise à jour des prix eToro</h2>
+                <button onclick="addNewAsset()" class="bg-green-500 hover:bg-green-600 text-white text-[10px] font-black py-2 px-4 rounded-lg transition uppercase">+ Ajouter un actif</button>
             </div>
             
             <div id="edit-fields" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6"></div>
             
             <div class="flex gap-3">
-                <button onclick="saveData()" class="bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold flex-1 shadow-lg hover:bg-indigo-700 transition uppercase text-xs tracking-widest">Enregistrer les modifications</button>
-                <button onclick="resetToDefault()" class="bg-slate-100 text-slate-400 px-4 py-3 rounded-xl font-bold hover:bg-red-50 hover:text-red-500 transition text-xs">Réinitialiser</button>
+                <button onclick="saveData()" class="bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold flex-1 shadow-lg hover:bg-indigo-700 transition uppercase text-xs tracking-widest">Enregistrer et Recalculer</button>
             </div>
         </div>
 
@@ -44,9 +43,10 @@
                 <thead class="bg-slate-50 text-slate-400 text-[10px] uppercase font-black border-b">
                     <tr>
                         <th class="p-4">Actif</th>
-                        <th class="p-4 text-right">Investi (15/01)</th>
-                        <th class="p-4 text-right">Valeur Actuelle</th>
-                        <th class="p-4 text-right">Évolution</th>
+                        <th class="p-4 text-right">PRU Unit.</th>
+                        <th class="p-4 text-right">Prix Actuel</th>
+                        <th class="p-4 text-right">Valeur Totale</th>
+                        <th class="p-4 text-right">Perf.</th>
                         <th class="p-4"></th>
                     </tr>
                 </thead>
@@ -59,16 +59,16 @@
 
     <script>
         const initialData = [
-            { ticker: "ESE", name: "BNP Paribas S&P 500", qty: 2.0, pru: 29.548, symbol: "AMEX:SPY", drift: 1.058 },
-            { ticker: "PSP 5", name: "Amundi S&P 500", qty: 2.0, pru: 51.24, symbol: "AMEX:VOO", drift: 1.057 },
-            { ticker: "cd8", name: "Amundi EMU High Dividend", qty: 1.0, pru: 196.56, symbol: "XETR:AMED", drift: 1.031 },
-            { ticker: "ppfb.de", name: "iShares Physical Gold", qty: 3.463, pru: 81.697, symbol: "TVC:GOLD", drift: 1.042 },
-            { ticker: "VOO", name: "Vanguard S&P 500", qty: 0.80245, pru: 634.28, symbol: "AMEX:VOO", drift: 1.058 },
-            { ticker: "SCHD", name: "Schwab US Dividend Equity", qty: 15.36204, pru: 29.69, symbol: "AMEX:SCHD", drift: 1.012 },
-            { ticker: "SWDA.L", name: "iShares MSCI World", qty: 2.07, pru: 92.25, symbol: "BATS:URTH", drift: 1.042 }
+            { ticker: "ESE", name: "BNP Paribas S&P 500", qty: 2.0, pru: 29.54, current: 31.25, symbol: "AMEX:SPY" },
+            { ticker: "PSP 5", name: "Amundi S&P 500", qty: 2.0, pru: 51.24, current: 54.16, symbol: "AMEX:VOO" },
+            { ticker: "cd8", name: "Amundi EMU High Dividend", qty: 1.0, pru: 196.56, current: 202.45, symbol: "XETR:AMED" },
+            { ticker: "ppfb.de", name: "iShares Physical Gold", qty: 3.463, pru: 81.69, current: 85.12, symbol: "TVC:GOLD" },
+            { ticker: "VOO", name: "Vanguard S&P 500", qty: 0.802, pru: 634.28, current: 671.10, symbol: "AMEX:VOO" },
+            { ticker: "SCHD", name: "Schwab US Dividend Equity", qty: 15.362, pru: 29.69, current: 30.05, symbol: "AMEX:SCHD" },
+            { ticker: "SWDA.L", name: "iShares MSCI World", qty: 2.07, pru: 92.25, current: 96.12, symbol: "BATS:URTH" }
         ];
 
-        let myPortfolio = JSON.parse(localStorage.getItem('myETFData')) || initialData;
+        let myPortfolio = JSON.parse(localStorage.getItem('myETFDataV2')) || initialData;
 
         function init() {
             let totalBasis = 0;
@@ -82,29 +82,25 @@
             editFields.innerHTML = '';
 
             myPortfolio.forEach((item, index) => {
-                let adjustedPru = item.pru;
-                if(item.ticker === "SWDA.L" && item.pru > 5000) adjustedPru = item.pru / 100;
-
-                const currentPrice = adjustedPru * (item.drift || 1.05); 
-                const basisValue = item.qty * adjustedPru;
-                const currentVal = item.qty * currentPrice;
-                const perf = ((currentPrice - adjustedPru) / adjustedPru * 100).toFixed(2);
+                const basisValue = item.qty * item.pru;
+                const currentVal = item.qty * item.current;
+                const perf = (((item.current - item.pru) / item.pru) * 100).toFixed(2);
 
                 totalBasis += basisValue;
                 totalCurrent += currentVal;
 
-                // Ligne du tableau
                 rowsContainer.innerHTML += `
                     <tr class="hover:bg-slate-50 transition">
                         <td class="p-4">
-                            <div class="font-bold text-slate-800 leading-tight text-xs md:text-sm">${item.name}</div>
+                            <div class="font-bold text-slate-800 leading-tight">${item.name}</div>
                             <div class="text-[9px] text-indigo-500 font-black uppercase tracking-tighter">${item.ticker}</div>
                         </td>
-                        <td class="p-4 text-right text-slate-500 font-mono">${basisValue.toFixed(2)}€</td>
+                        <td class="p-4 text-right text-slate-400 font-mono text-xs">${item.pru.toFixed(2)}€</td>
+                        <td class="p-4 text-right text-indigo-600 font-bold font-mono text-xs">${item.current.toFixed(2)}€</td>
                         <td class="p-4 text-right font-black text-slate-800 font-mono">${currentVal.toFixed(2)}€</td>
                         <td class="p-4 text-right">
                             <span class="px-2 py-0.5 rounded text-[10px] font-black ${perf >= 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
-                                ${perf >= 0 ? '▲' : '▼'} ${Math.abs(perf)}%
+                                ${perf >= 0 ? '+' : ''}${perf}%
                             </span>
                         </td>
                         <td class="p-4 text-right">
@@ -113,24 +109,33 @@
                     </tr>
                 `;
 
-                // Champs d'édition
                 editFields.innerHTML += `
-                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 relative group">
-                        <label class="block text-[9px] font-black text-indigo-600 uppercase mb-2">${item.name || 'Nouvel Actif'}</label>
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                        <label class="block text-[10px] font-black text-indigo-600 uppercase mb-2">${item.name}</label>
                         <div class="grid grid-cols-2 gap-2">
-                            <input type="text" id="name-${index}" value="${item.name}" class="col-span-2 p-2 text-[10px] border rounded focus:ring-1 focus:ring-indigo-400 outline-none" placeholder="Nom complet">
-                            <input type="text" id="tick-${index}" value="${item.ticker}" class="p-2 text-[10px] border rounded focus:ring-1 focus:ring-indigo-400 outline-none" placeholder="Ticker">
-                            <input type="text" id="symb-${index}" value="${item.symbol}" class="p-2 text-[10px] border rounded focus:ring-1 focus:ring-indigo-400 outline-none" placeholder="Symbole TV">
-                            <input type="number" step="any" id="qty-${index}" value="${item.qty}" class="p-2 text-[10px] border rounded focus:ring-1 focus:ring-indigo-400 outline-none" placeholder="Quantité">
-                            <input type="number" step="any" id="pru-${index}" value="${item.pru}" class="p-2 text-[10px] border rounded focus:ring-1 focus:ring-indigo-400 outline-none" placeholder="PRU €">
+                            <div class="col-span-2">
+                                <span class="text-[8px] uppercase text-slate-400 font-bold">Prix Actuel (eToro)</span>
+                                <input type="number" step="any" id="curr-${index}" value="${item.current}" class="w-full p-2 text-sm border-2 border-indigo-200 rounded-lg bg-white font-bold text-indigo-700">
+                            </div>
+                            <div>
+                                <span class="text-[8px] uppercase text-slate-400 font-bold">Qté</span>
+                                <input type="number" step="any" id="qty-${index}" value="${item.qty}" class="w-full p-2 text-[10px] border rounded bg-white">
+                            </div>
+                            <div>
+                                <span class="text-[8px] uppercase text-slate-400 font-bold">PRU €</span>
+                                <input type="number" step="any" id="pru-${index}" value="${item.pru}" class="w-full p-2 text-[10px] border rounded bg-white">
+                            </div>
+                            <input type="hidden" id="name-${index}" value="${item.name}">
+                            <input type="hidden" id="tick-${index}" value="${item.ticker}">
+                            <input type="hidden" id="symb-${index}" value="${item.symbol}">
                         </div>
                     </div>
                 `;
 
-                // Graphiques
+                // Graphiques (inchangés)
                 const card = document.createElement('div');
                 card.className = "bg-white p-4 rounded-2xl shadow-sm border border-slate-100";
-                card.innerHTML = `<h3 class="font-black mb-3 text-[10px] text-slate-400 uppercase flex justify-between tracking-widest">
+                card.innerHTML = `<h3 class="font-black mb-3 text-[10px] text-slate-400 uppercase flex justify-between">
                     <span>${item.name}</span>
                     <span class="text-indigo-300 font-mono">${item.ticker}</span>
                 </h3><div id="chart_${index}"></div>`;
@@ -162,30 +167,12 @@
         function toggleEdit() { document.getElementById('edit-panel').classList.toggle('hidden'); }
 
         function addNewAsset() {
-            myPortfolio.push({ ticker: "NOUV", name: "Nouvel Actif", qty: 0, pru: 0, symbol: "NASDAQ:AAPL", drift: 1.05 });
-            renderEditFieldsOnly(); 
-        }
-
-        function renderEditFieldsOnly() {
-            const editFields = document.getElementById('edit-fields');
-            editFields.innerHTML = '';
-            myPortfolio.forEach((item, index) => {
-                editFields.innerHTML += `
-                    <div class="bg-slate-50 p-3 rounded-xl border border-indigo-100">
-                        <label class="block text-[9px] font-black text-indigo-600 uppercase mb-2">Actif #${index + 1}</label>
-                        <div class="grid grid-cols-2 gap-2">
-                            <input type="text" id="name-${index}" value="${item.name}" class="col-span-2 p-2 text-[10px] border rounded" placeholder="Nom">
-                            <input type="text" id="tick-${index}" value="${item.ticker}" class="p-2 text-[10px] border rounded" placeholder="Ticker">
-                            <input type="text" id="symb-${index}" value="${item.symbol}" class="p-2 text-[10px] border rounded" placeholder="Symbole TV">
-                            <input type="number" step="any" id="qty-${index}" value="${item.qty}" class="p-2 text-[10px] border rounded" placeholder="Qté">
-                            <input type="number" step="any" id="pru-${index}" value="${item.pru}" class="p-2 text-[10px] border rounded" placeholder="PRU €">
-                        </div>
-                    </div>`;
-            });
+            myPortfolio.push({ ticker: "NOUV", name: "Nouvel Actif", qty: 0, pru: 0, current: 0, symbol: "NASDAQ:AAPL" });
+            saveData();
         }
 
         function deleteAsset(index) {
-            if(confirm("Supprimer cet actif ?")) {
+            if(confirm("Supprimer ?")) {
                 myPortfolio.splice(index, 1);
                 saveData();
             }
@@ -193,21 +180,18 @@
 
         function saveData() {
             myPortfolio.forEach((item, index) => {
-                item.name = document.getElementById(`name-${index}`).value;
-                item.ticker = document.getElementById(`tick-${index}`).value;
-                item.symbol = document.getElementById(`symb-${index}`).value;
-                item.qty = parseFloat(document.getElementById(`qty-${index}`).value) || 0;
-                item.pru = parseFloat(document.getElementById(`pru-${index}`).value) || 0;
+                const nameInp = document.getElementById(`name-${index}`);
+                if(nameInp) {
+                    item.name = nameInp.value;
+                    item.ticker = document.getElementById(`tick-${index}`).value;
+                    item.symbol = document.getElementById(`symb-${index}`).value;
+                    item.qty = parseFloat(document.getElementById(`qty-${index}`).value) || 0;
+                    item.pru = parseFloat(document.getElementById(`pru-${index}`).value) || 0;
+                    item.current = parseFloat(document.getElementById(`curr-${index}`).value) || 0;
+                }
             });
-            localStorage.setItem('myETFData', JSON.stringify(myPortfolio));
+            localStorage.setItem('myETFDataV2', JSON.stringify(myPortfolio));
             location.reload();
-        }
-
-        function resetToDefault() {
-            if(confirm("Réinitialiser le portfolio ?")) {
-                localStorage.removeItem('myETFData');
-                location.reload();
-            }
         }
 
         init();
