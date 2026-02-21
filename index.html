@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portfolio eToro Sync - Multi-Devises</title>
+    <title>Dashboard Portfolio Total</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 </head>
@@ -12,42 +12,38 @@
     <div class="max-w-6xl mx-auto">
         <header class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 col-span-1 md:col-span-2">
-                <h1 class="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Valorisation Totale en Euros</h1>
+                <h1 class="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Valorisation Totale (EUR)</h1>
                 <div class="flex flex-col md:flex-row items-center gap-4">
                     <span id="grand-total" class="text-4xl font-black text-slate-800 tracking-tight">--- €</span>
                     <span id="global-perc" class="text-lg font-bold px-4 py-1 rounded-full">--%</span>
                 </div>
                 <div class="mt-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                    Taux de change utilisé : 1$ = <input type="number" id="fx-rate" value="0.92" step="0.01" onchange="saveData()" class="w-12 bg-slate-100 border-none rounded px-1 text-indigo-600 focus:ring-0"> €
+                    Taux de change : 1$ = <input type="number" id="fx-rate" value="0.85" step="0.01" onchange="saveData()" class="w-12 bg-slate-100 border-none rounded px-1 text-indigo-600 focus:ring-0 font-black"> €
                 </div>
             </div>
-            <div class="bg-indigo-600 p-6 rounded-2xl shadow-lg text-white flex flex-col justify-center items-center md:items-start overflow-hidden">
+            <div class="bg-indigo-600 p-6 rounded-2xl shadow-lg text-white flex flex-col justify-center items-center md:items-start">
                 <span class="text-indigo-200 text-xs font-bold uppercase tracking-wide">Plus-value cumulée</span>
                 <div id="total-profit-euro" class="text-2xl font-bold italic">-- €</div>
-                <button onclick="toggleEdit()" class="mt-3 text-[10px] bg-white/20 hover:bg-white/30 py-1.5 px-4 rounded-full border border-white/20 transition-all font-bold uppercase tracking-widest">⚙️ Gérer les Actifs</button>
+                <button onclick="toggleEdit()" class="mt-3 text-[10px] bg-white/20 hover:bg-white/30 py-1.5 px-4 rounded-full border border-white/20 transition-all font-bold uppercase tracking-widest">⚙️ Configuration</button>
             </div>
         </header>
 
         <div id="edit-panel" class="hidden bg-white p-6 rounded-2xl mb-8 border border-indigo-100 shadow-xl">
-            <div class="flex justify-between items-center mb-6 px-2">
-                <h2 class="font-bold text-indigo-900">Synchronisation eToro</h2>
-                <button onclick="addNewAsset()" class="bg-green-500 hover:bg-green-600 text-white text-[10px] font-black py-2 px-4 rounded-lg transition uppercase">+ Ajouter un actif</button>
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="font-bold text-indigo-900 uppercase text-xs tracking-widest">Gestion des Actifs</h2>
+                <button onclick="addNewAsset()" class="bg-green-500 hover:bg-green-600 text-white text-[10px] font-black py-2 px-4 rounded-lg transition uppercase">+ Ajouter</button>
             </div>
-            
             <div id="edit-fields" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6"></div>
-            
-            <div class="flex gap-3 px-2">
-                <button onclick="saveData()" class="bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold flex-1 shadow-lg hover:bg-indigo-700 transition uppercase text-xs tracking-widest">Enregistrer & Calculer</button>
-            </div>
+            <button onclick="saveData()" class="bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold w-full shadow-lg hover:bg-indigo-700 transition uppercase text-xs tracking-widest">Enregistrer & Actualiser</button>
         </div>
 
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-10 overflow-x-auto">
             <table class="w-full text-left">
-                <thead class="bg-slate-50 text-slate-400 text-[10px] uppercase font-black border-b tracking-tighter">
+                <thead class="bg-slate-50 text-slate-400 text-[10px] uppercase font-black border-b">
                     <tr>
                         <th class="p-4">Actif</th>
-                        <th class="p-4 text-right">PRU</th>
-                        <th class="p-4 text-right">Prix Marché</th>
+                        <th class="p-4 text-right">Achat (PRU)</th>
+                        <th class="p-4 text-right">Marché</th>
                         <th class="p-4 text-right">Valeur (€)</th>
                         <th class="p-4 text-right">Gain (€)</th>
                         <th class="p-4"></th>
@@ -61,104 +57,86 @@
     </div>
 
     <script>
-        // On stocke le taux de change global
-        let fxRate = parseFloat(localStorage.getItem('fxRate')) || 0.92;
+        let fxRate = parseFloat(localStorage.getItem('fxRate')) || 0.85;
         document.getElementById('fx-rate').value = fxRate;
 
+        // Liste complète réintégrée
         const initialData = [
             { ticker: "SCHD", name: "Schwab US Dividend Equity", qty: 15.362, pru: 29.69, current: 31.61, currency: "USD", symbol: "AMEX:SCHD" },
             { ticker: "ESE", name: "BNP Paribas S&P 500", qty: 2.0, pru: 29.54, current: 31.25, currency: "EUR", symbol: "AMEX:SPY" },
+            { ticker: "PSP 5", name: "Amundi S&P 500", qty: 2.0, pru: 51.24, current: 54.16, currency: "EUR", symbol: "AMEX:VOO" },
+            { ticker: "cd8", name: "Amundi EMU High Dividend", qty: 1.0, pru: 196.56, current: 202.45, currency: "EUR", symbol: "XETR:AMED" },
             { ticker: "ppfb.de", name: "iShares Physical Gold", qty: 3.463, pru: 81.69, current: 85.12, currency: "EUR", symbol: "TVC:GOLD" },
-            { ticker: "SWDA.L", name: "iShares MSCI World", qty: 2.07, pru: 92.25, current: 96.12, currency: "EUR", symbol: "BATS:URTH" }
+            { ticker: "VOO", name: "Vanguard S&P 500", qty: 0.802, pru: 634.28, current: 671.10, currency: "USD", symbol: "AMEX:VOO" },
+            { ticker: "SWDA.L", name: "iShares MSCI World", qty: 2.07, pru: 92.25, current: 96.12, currency: "EUR", symbol: "BATS:URTH" },
+            { ticker: "IMRX", name: "Immuneering Corp", qty: 10, pru: 2.50, current: 2.80, currency: "USD", symbol: "NASDAQ:IMRX" }
         ];
 
-        let myPortfolio = JSON.parse(localStorage.getItem('myETFDataV3')) || initialData;
+        let myPortfolio = JSON.parse(localStorage.getItem('myETFDataV4')) || initialData;
 
         function init() {
             fxRate = parseFloat(document.getElementById('fx-rate').value);
-            let totalBasisEUR = 0;
-            let totalCurrentEUR = 0;
+            let totalBasisEUR = 0; let totalCurrentEUR = 0;
             const rowsContainer = document.getElementById('portfolio-rows');
             const editFields = document.getElementById('edit-fields');
             const chartsGrid = document.getElementById('charts-grid');
             
-            rowsContainer.innerHTML = '';
-            chartsGrid.innerHTML = '';
-            editFields.innerHTML = '';
+            rowsContainer.innerHTML = ''; chartsGrid.innerHTML = ''; editFields.innerHTML = '';
 
             myPortfolio.forEach((item, index) => {
-                // Conversion si l'actif est en USD
                 const multiplier = item.currency === "USD" ? fxRate : 1;
-                
                 const basisEUR = (item.qty * item.pru) * multiplier;
                 const currentValEUR = (item.qty * item.current) * multiplier;
                 const profitEUR = currentValEUR - basisEUR;
                 const perf = (((item.current - item.pru) / item.pru) * 100).toFixed(2);
 
-                totalBasisEUR += basisEUR;
-                totalCurrentEUR += currentValEUR;
+                totalBasisEUR += basisEUR; totalCurrentEUR += currentValEUR;
 
                 rowsContainer.innerHTML += `
                     <tr class="hover:bg-slate-50 transition">
                         <td class="p-4">
-                            <div class="font-bold text-slate-800 leading-tight">${item.name}</div>
-                            <div class="text-[9px] text-indigo-500 font-black uppercase tracking-tighter">${item.ticker}</div>
+                            <div class="font-bold text-slate-800 text-xs md:text-sm">${item.name}</div>
+                            <div class="text-[9px] text-indigo-500 font-black uppercase">${item.ticker}</div>
                         </td>
-                        <td class="p-4 text-right text-slate-400 font-mono text-xs">${item.pru} ${item.currency === "USD" ? '$' : '€'}</td>
-                        <td class="p-4 text-right text-indigo-600 font-bold font-mono text-xs">${item.current} ${item.currency === "USD" ? '$' : '€'}</td>
+                        <td class="p-4 text-right text-slate-400 font-mono text-xs">${item.pru}${item.currency === "USD" ? '$' : '€'}</td>
+                        <td class="p-4 text-right text-indigo-600 font-bold font-mono text-xs">${item.current}${item.currency === "USD" ? '$' : '€'}</td>
                         <td class="p-4 text-right font-black text-slate-800 font-mono">${currentValEUR.toFixed(2)}€</td>
                         <td class="p-4 text-right">
-                            <div class="text-[10px] font-black ${profitEUR >= 0 ? 'text-green-600' : 'text-red-600'}">
-                                ${profitEUR >= 0 ? '+' : ''}${profitEUR.toFixed(2)}€
-                            </div>
+                            <div class="text-[10px] font-black ${profitEUR >= 0 ? 'text-green-600' : 'text-red-600'}">${profitEUR >= 0 ? '+' : ''}${profitEUR.toFixed(2)}€</div>
                             <div class="text-[8px] text-slate-400">(${perf}%)</div>
                         </td>
-                        <td class="p-4 text-right">
-                            <button onclick="deleteAsset(${index})" class="text-slate-200 hover:text-red-500">✕</button>
-                        </td>
-                    </tr>
-                `;
+                        <td class="p-4 text-right"><button onclick="deleteAsset(${index})" class="text-slate-200 hover:text-red-500">✕</button></td>
+                    </tr>`;
 
                 editFields.innerHTML += `
                     <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
                         <div class="flex justify-between items-center mb-2">
-                            <label class="text-[10px] font-black text-indigo-600 uppercase">${item.ticker}</label>
-                            <select id="curr-type-${index}" class="text-[9px] font-bold border-none bg-indigo-100 rounded text-indigo-700">
+                            <label class="text-[9px] font-black text-indigo-600 uppercase">${item.name}</label>
+                            <select id="curr-type-${index}" class="text-[9px] font-bold border-none bg-indigo-100 rounded text-indigo-700 px-1">
                                 <option value="USD" ${item.currency === 'USD' ? 'selected' : ''}>USD ($)</option>
                                 <option value="EUR" ${item.currency === 'EUR' ? 'selected' : ''}>EUR (€)</option>
                             </select>
                         </div>
                         <div class="grid grid-cols-2 gap-2">
                             <div class="col-span-2">
-                                <span class="text-[8px] uppercase text-slate-400 font-bold">Prix Marché (${item.currency === "USD" ? '$' : '€'})</span>
-                                <input type="number" step="any" id="curr-${index}" value="${item.current}" class="w-full p-2 text-sm border-2 border-indigo-200 rounded-lg font-bold">
+                                <span class="text-[8px] uppercase text-slate-400 font-bold tracking-tighter">Prix Actuel (${item.currency === "USD" ? '$' : '€'})</span>
+                                <input type="number" step="any" id="curr-${index}" value="${item.current}" class="w-full p-2 text-xs border-2 border-indigo-200 rounded-lg font-bold">
                             </div>
-                            <div>
-                                <span class="text-[8px] uppercase text-slate-400 font-bold">Qté</span>
-                                <input type="number" step="any" id="qty-${index}" value="${item.qty}" class="w-full p-2 text-[10px] border rounded">
-                            </div>
-                            <div>
-                                <span class="text-[8px] uppercase text-slate-400 font-bold">PRU Origine</span>
-                                <input type="number" step="any" id="pru-${index}" value="${item.pru}" class="w-full p-2 text-[10px] border rounded">
-                            </div>
+                            <input type="number" step="any" id="qty-${index}" value="${item.qty}" class="p-2 text-[10px] border rounded" placeholder="Qté">
+                            <input type="number" step="any" id="pru-${index}" value="${item.pru}" class="p-2 text-[10px] border rounded" placeholder="PRU">
                             <input type="hidden" id="name-${index}" value="${item.name}">
                             <input type="hidden" id="tick-${index}" value="${item.ticker}">
                             <input type="hidden" id="symb-${index}" value="${item.symbol}">
                         </div>
-                    </div>
-                `;
+                    </div>`;
 
                 const card = document.createElement('div');
                 card.className = "bg-white p-4 rounded-2xl shadow-sm border border-slate-100";
-                card.innerHTML = `<h3 class="font-black mb-3 text-[10px] text-slate-400 uppercase flex justify-between tracking-widest">
-                    <span>${item.name}</span>
-                    <span class="text-indigo-300 font-mono">${item.ticker}</span>
-                </h3><div id="chart_${index}"></div>`;
+                card.innerHTML = `<h3 class="font-black mb-3 text-[10px] text-slate-400 uppercase flex justify-between tracking-widest"><span>${item.name}</span><span class="text-indigo-300 font-mono">${item.ticker}</span></h3><div id="chart_${index}"></div>`;
                 chartsGrid.appendChild(card);
 
                 new TradingView.MediumWidget({
-                    "symbols": [[item.symbol, item.symbol]],
-                    "width": "100%", "height": 260, "locale": "fr", "chartType": "area",
+                    "symbols": [[item.symbol, item.symbol]], "width": "100%", "height": 260, "locale": "fr", "chartType": "area",
                     "container_id": "chart_" + index, "timeDiffType": "year",
                     "lineColor": item.ticker === "ppfb.de" ? "#eab308" : "#4f46e5",
                     "topColor": item.ticker === "ppfb.de" ? "rgba(234, 179, 8, 0.1)" : "rgba(79, 70, 229, 0.1)",
@@ -186,30 +164,21 @@
             saveData();
         }
 
-        function deleteAsset(index) {
-            if(confirm("Supprimer ?")) {
-                myPortfolio.splice(index, 1);
-                saveData();
-            }
-        }
+        function deleteAsset(index) { if(confirm("Supprimer ?")) { myPortfolio.splice(index, 1); saveData(); } }
 
         function saveData() {
             const newFxRate = parseFloat(document.getElementById('fx-rate').value);
             localStorage.setItem('fxRate', newFxRate);
-
             myPortfolio.forEach((item, index) => {
                 const nameInp = document.getElementById(`name-${index}`);
                 if(nameInp) {
-                    item.name = nameInp.value;
-                    item.ticker = document.getElementById(`tick-${index}`).value;
-                    item.symbol = document.getElementById(`symb-${index}`).value;
                     item.qty = parseFloat(document.getElementById(`qty-${index}`).value) || 0;
                     item.pru = parseFloat(document.getElementById(`pru-${index}`).value) || 0;
                     item.current = parseFloat(document.getElementById(`curr-${index}`).value) || 0;
                     item.currency = document.getElementById(`curr-type-${index}`).value;
                 }
             });
-            localStorage.setItem('myETFDataV3', JSON.stringify(myPortfolio));
+            localStorage.setItem('myETFDataV4', JSON.stringify(myPortfolio));
             location.reload();
         }
 
