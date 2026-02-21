@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portfolio ETF - Version Stable</title>
+    <title>Portfolio ETF & Actions - Dynamique</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 </head>
@@ -12,49 +12,55 @@
     <div class="max-w-6xl mx-auto">
         <header class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 col-span-1 md:col-span-2">
-                <h1 class="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Valorisation Totale</h1>
+                <h1 class="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Valorisation du Portefeuille</h1>
                 <div class="flex flex-col md:flex-row items-center gap-4">
                     <span id="grand-total" class="text-4xl font-black text-slate-800 tracking-tight">--- €</span>
                     <span id="global-perc" class="text-lg font-bold px-4 py-1 rounded-full">--%</span>
                 </div>
-                <p class="text-slate-400 text-[10px] mt-2 italic font-medium">Performance depuis le 15 Janvier</p>
             </div>
-            <div class="bg-indigo-600 p-6 rounded-2xl shadow-lg text-white flex flex-col justify-center items-center md:items-start overflow-hidden">
+            <div class="bg-indigo-600 p-6 rounded-2xl shadow-lg text-white flex flex-col justify-center items-center md:items-start overflow-hidden shadow-indigo-200">
                 <span class="text-indigo-200 text-xs font-bold uppercase tracking-wide">Plus-value cumulée</span>
                 <div id="total-profit-euro" class="text-2xl font-bold italic">-- €</div>
-                <button onclick="toggleEdit()" class="mt-3 text-[10px] bg-white/20 hover:bg-white/30 py-1.5 px-4 rounded-full border border-white/20 transition-all font-bold uppercase">⚙️ Ajuster Positions</button>
+                <button onclick="toggleEdit()" class="mt-3 text-[10px] bg-white/20 hover:bg-white/30 py-1.5 px-4 rounded-full border border-white/20 transition-all font-bold uppercase">⚙️ Gérer les actifs</button>
             </div>
         </header>
 
         <div id="edit-panel" class="hidden bg-white p-6 rounded-2xl mb-8 border border-indigo-100 shadow-xl">
-            <h2 class="font-bold mb-4 text-indigo-900 flex items-center gap-2">Edition</h2>
-            <div id="edit-fields" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-            <button onclick="saveData()" class="mt-6 bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold w-full md:w-auto shadow-lg hover:bg-indigo-700 transition uppercase text-xs tracking-widest">Enregistrer</button>
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="font-bold text-indigo-900 flex items-center gap-2">Configuration des actifs</h2>
+                <button onclick="addNewAsset()" class="bg-green-500 hover:bg-green-600 text-white text-[10px] font-black py-2 px-4 rounded-lg transition uppercase tracking-wider">+ Ajouter un actif</button>
+            </div>
+            
+            <div id="edit-fields" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6"></div>
+            
+            <div class="flex gap-3">
+                <button onclick="saveData()" class="bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold flex-1 shadow-lg hover:bg-indigo-700 transition uppercase text-xs tracking-widest">Enregistrer les modifications</button>
+                <button onclick="resetToDefault()" class="bg-slate-100 text-slate-400 px-4 py-3 rounded-xl font-bold hover:bg-red-50 hover:text-red-500 transition text-xs">Réinitialiser</button>
+            </div>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-10">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-10 overflow-x-auto">
             <table class="w-full text-left">
                 <thead class="bg-slate-50 text-slate-400 text-[10px] uppercase font-black border-b">
                     <tr>
-                        <th class="p-4">Désignation de l'Actif</th>
+                        <th class="p-4">Actif</th>
                         <th class="p-4 text-right">Investi (15/01)</th>
                         <th class="p-4 text-right">Valeur Actuelle</th>
                         <th class="p-4 text-right">Évolution</th>
+                        <th class="p-4"></th>
                     </tr>
                 </thead>
                 <tbody id="portfolio-rows" class="divide-y divide-slate-100 font-medium text-sm"></tbody>
             </table>
         </div>
 
-        <h2 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-6 px-2 italic">Analyses Graphiques Temps Réel</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="charts-grid"></div>
     </div>
 
     <script>
-        const defaultData = [
+        const initialData = [
             { ticker: "ESE", name: "BNP Paribas S&P 500", qty: 2.0, pru: 29.548, symbol: "AMEX:SPY", drift: 1.058 },
             { ticker: "PSP 5", name: "Amundi S&P 500", qty: 2.0, pru: 51.24, symbol: "AMEX:VOO", drift: 1.057 },
-            // CHANGEMENT ICI : On utilise AMED (code international pour le même fonds Amundi EMU High Div)
             { ticker: "cd8", name: "Amundi EMU High Dividend", qty: 1.0, pru: 196.56, symbol: "XETR:AMED", drift: 1.031 },
             { ticker: "ppfb.de", name: "iShares Physical Gold", qty: 3.463, pru: 81.697, symbol: "TVC:GOLD", drift: 1.042 },
             { ticker: "VOO", name: "Vanguard S&P 500", qty: 0.80245, pru: 634.28, symbol: "AMEX:VOO", drift: 1.058 },
@@ -62,7 +68,7 @@
             { ticker: "SWDA.L", name: "iShares MSCI World", qty: 2.07, pru: 92.25, symbol: "BATS:URTH", drift: 1.042 }
         ];
 
-        let myPortfolio = JSON.parse(localStorage.getItem('myETFData')) || defaultData;
+        let myPortfolio = JSON.parse(localStorage.getItem('myETFData')) || initialData;
 
         function init() {
             let totalBasis = 0;
@@ -87,10 +93,11 @@
                 totalBasis += basisValue;
                 totalCurrent += currentVal;
 
+                // Ligne du tableau
                 rowsContainer.innerHTML += `
                     <tr class="hover:bg-slate-50 transition">
                         <td class="p-4">
-                            <div class="font-bold text-slate-800 leading-tight">${item.name}</div>
+                            <div class="font-bold text-slate-800 leading-tight text-xs md:text-sm">${item.name}</div>
                             <div class="text-[9px] text-indigo-500 font-black uppercase tracking-tighter">${item.ticker}</div>
                         </td>
                         <td class="p-4 text-right text-slate-500 font-mono">${basisValue.toFixed(2)}€</td>
@@ -100,19 +107,27 @@
                                 ${perf >= 0 ? '▲' : '▼'} ${Math.abs(perf)}%
                             </span>
                         </td>
+                        <td class="p-4 text-right">
+                            <button onclick="deleteAsset(${index})" class="text-slate-300 hover:text-red-500 transition">✕</button>
+                        </td>
                     </tr>
                 `;
 
+                // Champs d'édition
                 editFields.innerHTML += `
-                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
-                        <label class="block text-[9px] font-black text-indigo-600 uppercase mb-1">${item.name}</label>
-                        <div class="flex gap-2">
-                            <input type="number" step="any" id="qty-${index}" value="${item.qty}" class="w-1/2 p-2 text-xs border rounded-lg">
-                            <input type="number" step="any" id="pru-${index}" value="${item.pru}" class="w-1/2 p-2 text-xs border rounded-lg">
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 relative group">
+                        <label class="block text-[9px] font-black text-indigo-600 uppercase mb-2">${item.name || 'Nouvel Actif'}</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="text" id="name-${index}" value="${item.name}" class="col-span-2 p-2 text-[10px] border rounded focus:ring-1 focus:ring-indigo-400 outline-none" placeholder="Nom complet">
+                            <input type="text" id="tick-${index}" value="${item.ticker}" class="p-2 text-[10px] border rounded focus:ring-1 focus:ring-indigo-400 outline-none" placeholder="Ticker">
+                            <input type="text" id="symb-${index}" value="${item.symbol}" class="p-2 text-[10px] border rounded focus:ring-1 focus:ring-indigo-400 outline-none" placeholder="Symbole TV">
+                            <input type="number" step="any" id="qty-${index}" value="${item.qty}" class="p-2 text-[10px] border rounded focus:ring-1 focus:ring-indigo-400 outline-none" placeholder="Quantité">
+                            <input type="number" step="any" id="pru-${index}" value="${item.pru}" class="p-2 text-[10px] border rounded focus:ring-1 focus:ring-indigo-400 outline-none" placeholder="PRU €">
                         </div>
                     </div>
                 `;
 
+                // Graphiques
                 const card = document.createElement('div');
                 card.className = "bg-white p-4 rounded-2xl shadow-sm border border-slate-100";
                 card.innerHTML = `<h3 class="font-black mb-3 text-[10px] text-slate-400 uppercase flex justify-between tracking-widest">
@@ -123,21 +138,22 @@
 
                 new TradingView.MediumWidget({
                     "symbols": [[item.symbol, item.symbol]],
-                    "width": "100%", "height": 300, "locale": "fr", "chartType": "area",
+                    "width": "100%", "height": 280, "locale": "fr", "chartType": "area",
                     "container_id": "chart_" + index, "timeDiffType": "year",
                     "lineColor": item.ticker === "ppfb.de" ? "#eab308" : "#4f46e5",
-                    "topColor": item.ticker === "ppfb.de" ? "rgba(234, 179, 8, 0.12)" : "rgba(79, 70, 229, 0.12)",
-                    "bottomColor": "transparent",
-                    "gridLineColor": "#f1f5f9"
+                    "topColor": item.ticker === "ppfb.de" ? "rgba(234, 179, 8, 0.1)" : "rgba(79, 70, 229, 0.1)",
+                    "bottomColor": "transparent", "gridLineColor": "#f8fafc"
                 });
             });
 
-            const diffEuro = totalCurrent - totalBasis;
-            const diffPerc = ((totalCurrent / totalBasis - 1) * 100).toFixed(2);
+            updateHeader(totalBasis, totalCurrent);
+        }
 
-            document.getElementById('grand-total').innerText = totalCurrent.toLocaleString('fr-FR', { minimumFractionDigits: 2 }) + " €";
+        function updateHeader(basis, current) {
+            const diffEuro = current - basis;
+            const diffPerc = ((current / basis - 1) * 100).toFixed(2);
+            document.getElementById('grand-total').innerText = current.toLocaleString('fr-FR', { minimumFractionDigits: 2 }) + " €";
             document.getElementById('total-profit-euro').innerText = (diffEuro >= 0 ? '+' : '') + diffEuro.toLocaleString('fr-FR', { minimumFractionDigits: 2 }) + " €";
-            
             const percEl = document.getElementById('global-perc');
             percEl.innerText = (diffPerc >= 0 ? '+' : '') + diffPerc + "%";
             percEl.className = `text-lg font-black px-4 py-1 rounded-full ${diffPerc >= 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`;
@@ -145,13 +161,53 @@
 
         function toggleEdit() { document.getElementById('edit-panel').classList.toggle('hidden'); }
 
+        function addNewAsset() {
+            myPortfolio.push({ ticker: "NOUV", name: "Nouvel Actif", qty: 0, pru: 0, symbol: "NASDAQ:AAPL", drift: 1.05 });
+            renderEditFieldsOnly(); 
+        }
+
+        function renderEditFieldsOnly() {
+            const editFields = document.getElementById('edit-fields');
+            editFields.innerHTML = '';
+            myPortfolio.forEach((item, index) => {
+                editFields.innerHTML += `
+                    <div class="bg-slate-50 p-3 rounded-xl border border-indigo-100">
+                        <label class="block text-[9px] font-black text-indigo-600 uppercase mb-2">Actif #${index + 1}</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="text" id="name-${index}" value="${item.name}" class="col-span-2 p-2 text-[10px] border rounded" placeholder="Nom">
+                            <input type="text" id="tick-${index}" value="${item.ticker}" class="p-2 text-[10px] border rounded" placeholder="Ticker">
+                            <input type="text" id="symb-${index}" value="${item.symbol}" class="p-2 text-[10px] border rounded" placeholder="Symbole TV">
+                            <input type="number" step="any" id="qty-${index}" value="${item.qty}" class="p-2 text-[10px] border rounded" placeholder="Qté">
+                            <input type="number" step="any" id="pru-${index}" value="${item.pru}" class="p-2 text-[10px] border rounded" placeholder="PRU €">
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function deleteAsset(index) {
+            if(confirm("Supprimer cet actif ?")) {
+                myPortfolio.splice(index, 1);
+                saveData();
+            }
+        }
+
         function saveData() {
             myPortfolio.forEach((item, index) => {
+                item.name = document.getElementById(`name-${index}`).value;
+                item.ticker = document.getElementById(`tick-${index}`).value;
+                item.symbol = document.getElementById(`symb-${index}`).value;
                 item.qty = parseFloat(document.getElementById(`qty-${index}`).value) || 0;
                 item.pru = parseFloat(document.getElementById(`pru-${index}`).value) || 0;
             });
             localStorage.setItem('myETFData', JSON.stringify(myPortfolio));
             location.reload();
+        }
+
+        function resetToDefault() {
+            if(confirm("Réinitialiser le portfolio ?")) {
+                localStorage.removeItem('myETFData');
+                location.reload();
+            }
         }
 
         init();
